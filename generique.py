@@ -42,16 +42,15 @@ html_content = f"""
         #scroll-container {{
             position: relative;
             width: 80%;
-            height: 100px; /* Hauteur visible du conteneur */
             margin: 0 auto;
+            height: 100px; /* Hauteur visible du conteneur */
             overflow: hidden;
-            border: 2px solid #000; /* Optionnel : Bordure pour visualiser le conteneur */
-            background-color: #f9f9f9; /* Optionnel : Couleur de fond */
+            background-color: #ffffff; /* Couleur de fond */
         }}
         #scroll-content {{
             display: flex;
             flex-direction: column;
-            animation: scroll 30s linear infinite;
+            animation: scroll {30}s linear infinite;
         }}
         .phrase {{
             width: 100%;
@@ -61,7 +60,7 @@ html_content = f"""
             box-sizing: border-box;
             opacity: 0;
             transform: translateY(20px);
-            animation: fadeInOut 30s linear infinite;
+            animation: fadeInOut {30}s linear infinite;
         }}
         @keyframes scroll {{
             0% {{
@@ -73,22 +72,27 @@ html_content = f"""
         }}
         @keyframes fadeInOut {{
             0%, 100% {{ opacity: 0; }}
-            5%, 25% {{ opacity: 1; }}
+            10%, 30% {{ opacity: 1; }}
         }}
     </style>
 
     <script>
+        const phrases = {phrases_js};
+        let index = 0;
+        let forward = true;
+        const container = document.getElementById("scroll-container");
+        const scrollContent = document.getElementById("scroll-content");
+
         // Ajuster la durée de l'animation en fonction du nombre de phrases
         const totalPhrases = {len(phrases)};
         const animationDuration = 30; // Durée totale de l'animation en secondes
 
-        const scrollContent = document.getElementById("scroll-content");
         scrollContent.style.animation = `scroll ${animationDuration}s linear infinite`;
 
         const phrasesElements = document.querySelectorAll(".phrase");
         phrasesElements.forEach((el, index) => {{
             el.style.animation = `fadeInOut ${animationDuration}s linear infinite`;
-            el.style.animationDelay = `${(index * animationDuration) / totalPhrases}s`;
+            el.style.animationDelay = `${{(index * animationDuration) / totalPhrases}}s`;
         }});
     </script>
 """
