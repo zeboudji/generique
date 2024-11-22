@@ -49,7 +49,6 @@ html_content = f"""
             display: flex;
             align-items: center;
             justify-content: center;
-            border: none; /* Pas de bordure */
         }}
         #scroll-content {{
             display: flex;
@@ -99,7 +98,7 @@ html_content = f"""
 
             // Calculer la nouvelle position
             const translateY = -currentIndex * 40; // 40px est la hauteur de chaque phrase
-            scrollContent.style.transform = `translateY(${{translateY}}px)`;
+            scrollContent.style.transform = `translateY(${translateY}px)`;
         }}
 
         // Fonction pour passer à la phrase suivante
