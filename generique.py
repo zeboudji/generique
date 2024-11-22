@@ -31,11 +31,9 @@ phrases_js = json.dumps(phrases)
 # Contenu HTML avec CSS et JavaScript intégrés
 html_content = f"""
     <div id="scroll-container">
-        <div id="scroll-content">
-            {"".join([f'<div class="phrase">{phrase}</div>' for phrase in phrases])}
-            <!-- Répéter les phrases pour une boucle infinie -->
-            {"".join([f'<div class="phrase">{phrase}</div>' for phrase in phrases])}
-        </div>
+        <div class="phrase previous">&nbsp;</div>
+        <div class="phrase current"></div>
+        <div class="phrase next">&nbsp;</div>
     </div>
 
     <style>
@@ -47,68 +45,85 @@ html_content = f"""
             overflow: hidden;
             background-color: #ffffff; /* Couleur de fond */
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-        }}
-        #scroll-content {{
-            display: flex;
-            flex-direction: column;
-            animation: scroll 30s linear infinite;
         }}
         .phrase {{
             width: 100%;
             text-align: center;
             font-size: 16px;
-            padding: 10px 0;
-            box-sizing: border-box;
             opacity: 0.6;
-            transition: transform 0.5s, opacity 0.5s;
+            transition: all 0.5s ease-in-out;
+            position: absolute;
+            left: 0;
         }}
         .current {{
             font-size: 24px;
             opacity: 1;
-            transform: scale(1.2);
+            transform: translateY(0px) scale(1.2);
         }}
-        @keyframes scroll {{
-            0% {{
-                transform: translateY(0);
-            }}
-            100% {{
-                transform: translateY(-50%);
-            }}
+        .previous {{
+            transform: translateY(-30px) scale(1);
+        }}
+        .next {{
+            transform: translateY(30px) scale(1);
         }}
     </style>
 
     <script>
         const phrases = {phrases_js};
-        const scrollContent = document.getElementById("scroll-content");
-        const phraseElements = document.querySelectorAll(".phrase");
+        let index = 0;
+        const totalPhrases = phrases.length;
 
-        // Calcul de la durée par phrase
-        const animationDuration = 30; // Durée totale de l'animation en secondes
-        const totalPhrases = {len(phrases)};
-        const phraseDuration = animationDuration / totalPhrases;
+        const currentEl = document.querySelector('.current');
+        let previousEl = document.querySelector('.previous');
+        let nextEl = document.querySelector('.next');
 
-        let currentIndex = 0;
+        function updatePhrases() {{
+            currentEl.textContent = phrases[index];
+            previousEl.textContent = phrases[(index - 1 + totalPhrases) % totalPhrases];
+            nextEl.textContent = phrases[(index + 1) % totalPhrases];
+        }}
 
-        function updateCurrent() {{
-            // Retirer la classe 'current' de toutes les phrases
-            phraseElements.forEach(el => el.classList.remove("current"));
+        function nextPhrase() {{
+            // Retirer les classes actuelles
+            currentEl.classList.remove('current');
+            previousEl.classList.remove('previous');
+            nextEl.classList.remove('next');
 
-            // Ajouter la classe 'current' à la phrase actuelle
-            if (currentIndex < phraseElements.length) {{
-                phraseElements[currentIndex].classList.add("current");
-            }}
+            // Ajouter les nouvelles classes
+            currentEl.classList.add('previous');
+            nextEl.classList.add('current');
+
+            // Mettre à jour l'index
+            index = (index + 1) % totalPhrases;
+
+            // Mettre à jour les phrases
+            updatePhrases();
+
+            // Après la transition, réassigner les classes
+            setTimeout(() => {{
+                // Retirer les anciennes classes
+                currentEl.classList.remove('previous');
+                previousEl.classList.remove('previous');
+
+                // Swap les éléments
+                let temp = previousEl;
+                previousEl = currentEl;
+                currentEl = nextEl;
+                nextEl = temp;
+
+                // Mettre à jour la classe 'next' pour le nouvel élément suivant
+                nextEl.classList.add('next');
+            }}, 500); // Durée de la transition (0.5s)
         }}
 
         // Initialisation
-        updateCurrent();
+        updatePhrases();
 
-        // Mise à jour de la classe 'current' à chaque intervalle
-        setInterval(() => {{
-            currentIndex = (currentIndex + 1) % totalPhrases;
-            updateCurrent();
-        }}, phraseDuration * 1000);
+        // Changer de phrase toutes les 3 secondes avec animation
+        setInterval(nextPhrase, 3000); // Change phrase every 3 seconds
     </script>
 """
 
