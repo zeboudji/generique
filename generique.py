@@ -30,8 +30,8 @@ phrases_js = json.dumps(phrases)
 
 # Calculer la hauteur totale du scroll-content
 phrase_height = 40  # Hauteur de chaque phrase en pixels
-visible_phrases = 3  # Nombre de phrases visibles
-scroll_height = len(phrases) * phrase_height
+visible_phrases = 3  # Nombre de phrases visibles (1 centrale et 2 secondaires)
+scroll_duration = 10  # Durée totale du défilement (en secondes)
 
 # Contenu HTML avec CSS et JavaScript intégrés
 html_content = f"""
@@ -60,7 +60,7 @@ html_content = f"""
             display: flex;
             flex-direction: column;
             position: relative;
-            transition: transform 0.5s ease-in-out;
+            animation: scroll {scroll_duration}s linear infinite;
         }}
 
         /* Styles des phrases */
@@ -82,51 +82,56 @@ html_content = f"""
             opacity: 1;
             transform: scale(1);
         }}
+
+        /* Animation keyframes pour un défilement fluide */
+        @keyframes scroll {{
+            0% {{ transform: translateY(0); }}
+            100% {{ transform: translateY(-{len(phrases) * phrase_height}px); }}
+        }}
     </style>
 
     <script>
         const scrollContent = document.getElementById("scroll-content");
         const phraseElements = document.querySelectorAll(".phrase");
-
         const totalPhrases = {len(phrases)};
-        let currentIndex = 0;
+        const phraseHeight = {phrase_height};
+        let offset = 0;
 
-        // Fonction pour mettre à jour les styles des phrases
-        function updatePhrases() {{
-            // Réinitialiser toutes les classes
-            phraseElements.forEach(el => el.classList.remove("current"));
+        // Fonction pour mettre à jour les styles dynamiques
+        function updateStyles() {{
+            phraseElements.forEach((el, index) => {{
+                el.classList.remove("current");
 
-            // Déterminer l'index de la phrase centrale
-            const centralIndex = currentIndex % totalPhrases;
-
-            // Ajouter la classe 'current' uniquement à la phrase centrale
-            if (phraseElements[centralIndex]) {{
-                phraseElements[centralIndex].classList.add("current");
-            }}
+                // Calculer la distance de la phrase par rapport au centre
+                const distanceFromCenter = Math.abs(index - (offset % totalPhrases));
+                if (distanceFromCenter === 0) {{
+                    el.classList.add("current"); // Phrase au centre
+                }}
+            }});
         }}
 
-        // Fonction de défilement automatique
+        // Boucle infinie de mise à jour
         function scroll() {{
-            currentIndex += 1;
-            if (currentIndex >= totalPhrases) {{
-                currentIndex = 0; // Réinitialisation en boucle
-                scrollContent.style.transition = 'none'; // Désactiver temporairement la transition
-                scrollContent.style.transform = 'translateY(0px)'; // Réinitialisation instantanée
-                void scrollContent.offsetWidth; // Forcer un reflow pour appliquer les changements
-                scrollContent.style.transition = 'transform 0.5s ease-in-out'; // Réactiver la transition
+            offset++;
+            const translateY = -offset * phraseHeight;
+
+            // Réinitialisation pour un défilement fluide
+            if (offset >= totalPhrases) {{
+                offset = 0;
+                scrollContent.style.transition = "none";
+                scrollContent.style.transform = "translateY(0px)";
+                void scrollContent.offsetWidth; // Forcer un reflow
+                scrollContent.style.transition = "transform 0.3s ease-in-out";
+            }} else {{
+                scrollContent.style.transform = "translateY(" + translateY + "px)";
             }}
 
-            // Déplacer le contenu
-            const translateY = -currentIndex * {phrase_height};
-            scrollContent.style.transform = "translateY(" + translateY + "px)";
-
-            // Mettre à jour les phrases
-            updatePhrases();
+            updateStyles();
         }}
 
-        // Initialisation
-        updatePhrases();
-        setInterval(scroll, 3000); // Défilement toutes les 3 secondes
+        // Démarrer l'animation
+        setInterval(scroll, 1000); // Défilement toutes les secondes
+        updateStyles(); // Initialisation
     </script>
 """
 
