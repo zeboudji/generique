@@ -66,7 +66,7 @@ st.markdown(f"""
         }}
         .next {{
             transform: translateY(30px);
-        }
+        }}
     </style>
 
     <script>
