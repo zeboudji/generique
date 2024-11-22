@@ -28,17 +28,22 @@ phrases = [
 # Sérialiser les phrases en format JSON pour JavaScript
 phrases_js = json.dumps(phrases)
 
+# Calculer la hauteur totale du scroll-content
+phrase_height = 40  # Hauteur de chaque phrase en pixels
+total_phrases = len(phrases)
+scroll_height = total_phrases * phrase_height
+
 # Contenu HTML avec CSS et JavaScript intégrés
 html_content = f"""
     <div id="scroll-container">
         <div id="scroll-content">
             {"".join([f'<div class="phrase">{phrase}</div>' for phrase in phrases])}
-            <!-- Répéter les phrases pour une boucle infinie -->
-            {"".join([f'<div class="phrase">{phrase}</div>' for phrase in phrases])}
+            {"".join([f'<div class="phrase">{phrase}</div>' for phrase in phrases])} <!-- Duplication pour boucle infinie -->
         </div>
     </div>
 
     <style>
+        /* Conteneur principal */
         #scroll-container {{
             position: relative;
             width: 80%;
@@ -49,16 +54,19 @@ html_content = f"""
             display: flex;
             align-items: center;
             justify-content: center;
-            border: none; /* Pas de bordure */
         }}
+
+        /* Contenu défilant */
         #scroll-content {{
             display: flex;
             flex-direction: column;
             position: absolute;
             top: 0;
             left: 0;
-            transition: transform 0.5s ease-in-out;
+            transform: translateY(0);
         }}
+
+        /* Styles des phrases */
         .phrase {{
             width: 100%;
             text-align: center;
@@ -67,8 +75,10 @@ html_content = f"""
             line-height: 40px;
             box-sizing: border-box;
             opacity: 0.6;
-            transition: all 0.5s ease-in-out;
+            transition: all 0.3s ease-in-out;
         }}
+
+        /* Style de la phrase centrale */
         .current {{
             font-size: 24px;
             opacity: 1;
@@ -81,35 +91,41 @@ html_content = f"""
         const scrollContent = document.getElementById("scroll-content");
         const phraseElements = document.querySelectorAll(".phrase");
 
-        const totalPhrases = {len(phrases)};
-        let currentIndex = 0;
+        const totalPhrases = {total_phrases};
+        let position = 0;
+        const phraseHeight = {phrase_height}; // Hauteur de chaque phrase en px
+        const scrollSpeed = 0.5; // Vitesse de défilement (pixels par frame)
+        const centralPosition = 60; // Position centrale en px (moitié de la hauteur du conteneur)
 
-        // Initialisation
-        updatePhrases();
-
-        // Fonction pour mettre à jour les classes
+        // Fonction pour mettre à jour les classes des phrases
         function updatePhrases() {{
             // Réinitialiser toutes les classes
             phraseElements.forEach(el => el.classList.remove("current"));
 
-            // Ajouter la classe 'current' à la phrase centrale
-            if (phraseElements[currentIndex]) {{
-                phraseElements[currentIndex].classList.add("current");
+            // Calculer l'indice de la phrase centrale
+            const currentPhraseIndex = Math.floor((position + centralPosition - (phraseHeight / 2)) / phraseHeight);
+            if (phraseElements[currentPhraseIndex]) {{
+                phraseElements[currentPhraseIndex].classList.add("current");
+            }}
+        }}
+
+        // Fonction de défilement
+        function scroll() {{
+            position -= scrollSpeed;
+            scrollContent.style.transform = `translateY(${position}px)`;
+
+            // Si le défilement a atteint la fin d'une boucle, réinitialiser la position
+            if (position <= -{scroll_height}px) {{
+                position += {scroll_height}px;
             }}
 
-            // Calculer la nouvelle position
-            const translateY = -currentIndex * 40; // 40px est la hauteur de chaque phrase
-            scrollContent.style.transform = `translateY(${{translateY}}px)`;
-        }}
-
-        // Fonction pour passer à la phrase suivante
-        function nextPhrase() {{
-            currentIndex = (currentIndex + 1) % totalPhrases;
             updatePhrases();
+            requestAnimationFrame(scroll);
         }}
 
-        // Changer de phrase toutes les 3 secondes avec animation
-        setInterval(nextPhrase, 3000); // Change phrase every 3 seconds
+        // Initialisation
+        updatePhrases();
+        scroll();
     </script>
 """
 
