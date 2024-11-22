@@ -31,7 +31,7 @@ phrases_js = json.dumps(phrases)
 # Calcul des dimensions
 phrase_height = 50  # Hauteur de chaque phrase en pixels
 visible_phrases = 3  # Nombre de phrases visibles
-scroll_duration = 10  # Durée totale du défilement (en secondes)
+scroll_duration = 30  # Durée totale du défilement (en secondes)
 
 # HTML avec CSS et JavaScript
 html_content = f"""
