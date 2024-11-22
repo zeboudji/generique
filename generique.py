@@ -45,12 +45,13 @@ html_content = f"""
             margin: 0 auto;
             height: 100px; /* Hauteur visible du conteneur */
             overflow: hidden;
-            background-color: #ffffff; /* Couleur de fond */
+            border: 2px solid #000; /* Optionnel : Bordure pour visualiser le conteneur */
+            background-color: #f9f9f9; /* Optionnel : Couleur de fond */
         }}
         #scroll-content {{
             display: flex;
             flex-direction: column;
-            animation: scroll {30}s linear infinite;
+            animation: scroll 30s linear infinite;
         }}
         .phrase {{
             width: 100%;
@@ -60,7 +61,7 @@ html_content = f"""
             box-sizing: border-box;
             opacity: 0;
             transform: translateY(20px);
-            animation: fadeInOut {30}s linear infinite;
+            animation: fadeInOut 30s linear infinite;
         }}
         @keyframes scroll {{
             0% {{
@@ -72,7 +73,7 @@ html_content = f"""
         }}
         @keyframes fadeInOut {{
             0%, 100% {{ opacity: 0; }}
-            10%, 30% {{ opacity: 1; }}
+            5%, 25% {{ opacity: 1; }}
         }}
     </style>
 
@@ -87,11 +88,11 @@ html_content = f"""
         const totalPhrases = {len(phrases)};
         const animationDuration = 30; // Durée totale de l'animation en secondes
 
-        scrollContent.style.animation = `scroll ${animationDuration}s linear infinite`;
+        scrollContent.style.animation = `scroll ${{animationDuration}}s linear infinite`;
 
         const phrasesElements = document.querySelectorAll(".phrase");
         phrasesElements.forEach((el, index) => {{
-            el.style.animation = `fadeInOut ${animationDuration}s linear infinite`;
+            el.style.animation = `fadeInOut ${{animationDuration}}s linear infinite`;
             el.style.animationDelay = `${{(index * animationDuration) / totalPhrases}}s`;
         }});
     </script>
