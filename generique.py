@@ -1,93 +1,143 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Effet de lecture dynamique</title>
+import streamlit as st
+import json
+import streamlit.components.v1 as components
+
+# Configuration de la page
+st.set_page_config(page_title="Effet Texte Inversé", layout="centered")
+
+# Liste de vos phrases
+phrases = [
+    "La nouvelle offre d’acculturation à l’IA d’Inside est lancée.",
+    "Après 10 ans d’expertise dans la transformation digitale.",
+    "Après une année d'exploration de l'IA avec les meilleurs experts.",
+    "La passion peut s’essouffler.",
+    "Il serait fou de penser que",
+    "Nous pouvons encore surprendre.",
+    "Comme vous l’imaginez,",
+    "L’enthousiasme finit toujours par s’éteindre.",
+    "Il faut arrêter de dire que",
+    "L’IA va transformer nos vies.",
+    "Certains pensent même que",
+    "L’IA est loin d'être une révolution.",
+    "Il est donc difficile de croire que",
+    "Cette offre est exceptionnelle et une avancée majeure.",
+    "---",
+    "Pourtant..."
+]
+
+# Sérialiser les phrases en format JSON pour JavaScript
+phrases_js = json.dumps(phrases)
+
+# Contenu HTML avec CSS et JavaScript intégrés
+html_content = f"""
+    <div id="text-container">
+        <div class="phrase previous">&nbsp;</div>
+        <div class="phrase current"></div>
+        <div class="phrase next">&nbsp;</div>
+    </div>
+
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            background-color: #111;
-            color: #fff;
-        }
-        .text-container {
+        #text-container {{
             position: relative;
-            height: 100vh;
+            width: 80%;
+            margin: 0 auto;
+            height: 100px;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
             overflow: hidden;
-        }
-        .text-content {
+        }}
+        .phrase {{
             position: absolute;
-            top: 100%;
-            animation: slide-down 10s infinite;
-        }
-        .text-reversed {
-            position: absolute;
-            bottom: -100%;
-            animation: slide-up 10s infinite;
-        }
-        @keyframes slide-down {
-            0% {
-                top: 100%;
-            }
-            50% {
-                top: 0%;
-            }
-            100% {
-                top: -100%;
-            }
-        }
-        @keyframes slide-up {
-            0% {
-                bottom: -100%;
-            }
-            50% {
-                bottom: 0%;
-            }
-            100% {
-                bottom: 100%;
-            }
-        }
-        .text {
-            padding: 10px;
-            font-size: 2em;
-            line-height: 1.5;
+            width: 100%;
             text-align: center;
-        }
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+        }}
+        .current {{
+            font-size: 24px;
+            opacity: 1;
+            transform: translateY(0);
+        }}
+        .previous, .next {{
+            font-size: 16px;
+            opacity: 0.6;
+        }}
+        .previous {{
+            transform: translateY(-30px);
+        }}
+        .next {{
+            transform: translateY(30px);
+        }}
     </style>
-</head>
-<body>
-    <div class="text-container">
-        <div class="text-content">
-            <div class="text">La nouvelle offre d’acculturation à l’IA d’Inside est lancée.</div>
-            <div class="text">Après 10 ans d’expertise dans la transformation digitale,</div>
-            <div class="text">et une année entière d’exploration de l’intelligence artificielle,</div>
-            <div class="text">la sensibilisation à l’IA semble se tasser.</div>
-            <div class="text">Il serait naïf de croire que nous pouvons encore surprendre.</div>
-            <div class="text">Comme vous le savez, l’enthousiasme finit toujours par s’éteindre.</div>
-            <div class="text">Il est temps d’arrêter de dire que l’IA est l’avenir.</div>
-            <div class="text">Certains pensent même que l’IA est une mode passagère.</div>
-            <div class="text">Il est donc difficile de croire.</div>
-            <div class="text">En termes de transformation digitale, cette offre est une révolution.</div>
-        </div>
-        <div class="text-reversed">
-            <div class="text">Cette offre est une révolution en termes de transformation digitale.</div>
-            <div class="text">Il est donc difficile de croire.</div>
-            <div class="text">Certains pensent même que l’IA est l’avenir.</div>
-            <div class="text">Il est temps d’arrêter de dire que l’enthousiasme finit toujours par s’éteindre.</div>
-            <div class="text">Comme vous le savez, nous pouvons encore surprendre.</div>
-            <div class="text">La sensibilisation à l’IA ne se tasse pas.</div>
-            <div class="text">Après une année entière d’exploration de l’intelligence artificielle,</div>
-            <div class="text">et 10 ans d’expertise dans la transformation digitale,</div>
-            <div class="text">la nouvelle offre d’acculturation à l’IA d’Inside est lancée.</div>
-            <div class="text">Cette offre est une révolution en termes de transformation digitale.</div>
-        </div>
-    </div>
-</body>
-</html>
+
+    <script>
+        const phrases = {phrases_js};
+        let index = 0;
+        let forward = true;
+        const container = document.getElementById("text-container");
+        const current = container.querySelector(".current");
+        const previous = container.querySelector(".previous");
+        const next = container.querySelector(".next");
+
+        function updatePhrases() {{
+            // Pré-animation : réduire l'opacité et déplacer légèrement les phrases
+            current.style.opacity = 0;
+            previous.style.opacity = 0;
+            next.style.opacity = 0;
+            previous.style.transform = "translateY(-20px)";
+            next.style.transform = "translateY(20px)";
+
+            setTimeout(() => {{
+                // Mettre à jour le contenu
+                current.textContent = phrases[index];
+                if (index > 0) {{
+                    previous.textContent = phrases[index - 1];
+                }} else {{
+                    previous.innerHTML = "&nbsp;";
+                }}
+                if (index < phrases.length - 1) {{
+                    next.textContent = phrases[index + 1];
+                }} else {{
+                    next.innerHTML = "&nbsp;";
+                }}
+
+                // Ré-animer pour afficher les nouvelles phrases
+                current.style.opacity = 1;
+                previous.style.opacity = 0.6;
+                next.style.opacity = 0.6;
+                previous.style.transform = "translateY(-30px)";
+                next.style.transform = "translateY(30px)";
+            }}, 500); // Temps de la pré-animation
+        }}
+
+        function changePhrase() {{
+            if (forward) {{
+                if (index < phrases.length - 1) {{
+                    index += 1;
+                }} else {{
+                    forward = false;
+                    index -= 1;
+                }}
+            }} else {{
+                if (index > 0) {{
+                    index -= 1;
+                }} else {{
+                    forward = true;
+                    index += 1;
+                }}
+            }}
+            updatePhrases();
+        }}
+
+        // Affichage initial
+        updatePhrases();
+
+        // Changer de phrase toutes les 2 secondes
+        setInterval(changePhrase, 2000);
+    </script>
+"""
+
+# Intégrer le contenu HTML/CSS/JS dans l'application Streamlit
+components.html(html_content, height=200)
