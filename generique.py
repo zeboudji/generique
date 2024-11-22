@@ -43,10 +43,12 @@ html_content = f"""
             position: relative;
             width: 80%;
             margin: 0 auto;
-            height: 100px; /* Hauteur visible du conteneur */
+            height: 120px; /* Hauteur visible du conteneur */
             overflow: hidden;
-            border: 2px solid #000; /* Optionnel : Bordure pour visualiser le conteneur */
-            background-color: #f9f9f9; /* Optionnel : Couleur de fond */
+            background-color: #ffffff; /* Couleur de fond */
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }}
         #scroll-content {{
             display: flex;
@@ -56,12 +58,16 @@ html_content = f"""
         .phrase {{
             width: 100%;
             text-align: center;
-            font-size: 24px;
+            font-size: 16px;
             padding: 10px 0;
             box-sizing: border-box;
-            opacity: 0;
-            transform: translateY(20px);
-            animation: fadeInOut 30s linear infinite;
+            opacity: 0.6;
+            transition: transform 0.5s, opacity 0.5s;
+        }}
+        .current {{
+            font-size: 24px;
+            opacity: 1;
+            transform: scale(1.2);
         }}
         @keyframes scroll {{
             0% {{
@@ -71,30 +77,38 @@ html_content = f"""
                 transform: translateY(-50%);
             }}
         }}
-        @keyframes fadeInOut {{
-            0%, 100% {{ opacity: 0; }}
-            5%, 25% {{ opacity: 1; }}
-        }}
     </style>
 
     <script>
         const phrases = {phrases_js};
-        let index = 0;
-        let forward = true;
-        const container = document.getElementById("scroll-container");
         const scrollContent = document.getElementById("scroll-content");
+        const phraseElements = document.querySelectorAll(".phrase");
 
-        // Ajuster la durée de l'animation en fonction du nombre de phrases
-        const totalPhrases = {len(phrases)};
+        // Calcul de la durée par phrase
         const animationDuration = 30; // Durée totale de l'animation en secondes
+        const totalPhrases = {len(phrases)};
+        const phraseDuration = animationDuration / totalPhrases;
 
-        scrollContent.style.animation = `scroll ${{animationDuration}}s linear infinite`;
+        let currentIndex = 0;
 
-        const phrasesElements = document.querySelectorAll(".phrase");
-        phrasesElements.forEach((el, index) => {{
-            el.style.animation = `fadeInOut ${{animationDuration}}s linear infinite`;
-            el.style.animationDelay = `${{(index * animationDuration) / totalPhrases}}s`;
-        }});
+        function updateCurrent() {{
+            // Retirer la classe 'current' de toutes les phrases
+            phraseElements.forEach(el => el.classList.remove("current"));
+
+            // Ajouter la classe 'current' à la phrase actuelle
+            if (currentIndex < phraseElements.length) {{
+                phraseElements[currentIndex].classList.add("current");
+            }}
+        }}
+
+        // Initialisation
+        updateCurrent();
+
+        // Mise à jour de la classe 'current' à chaque intervalle
+        setInterval(() => {{
+            currentIndex = (currentIndex + 1) % totalPhrases;
+            updateCurrent();
+        }}, phraseDuration * 1000);
     </script>
 """
 
