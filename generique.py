@@ -46,9 +46,9 @@ html_content = f"""
         /* Conteneur principal */
         #scroll-container {{
             position: relative;
-            width: 80%;
+            width: 100%;
             margin: 0 auto;
-            height: 120px; /* Hauteur visible du conteneur (3 phrases * 40px) */
+            height: 220px; /* Hauteur visible du conteneur (3 phrases * 40px) */
             overflow: hidden;
             background-color: #ffffff; /* Couleur de fond */
             display: flex;
@@ -134,4 +134,4 @@ html_content = f"""
 """
 
 # Intégrer le contenu HTML/CSS/JS dans l'application Streamlit
-components.html(html_content, height=220)
+components.html(html_content, height=420)
