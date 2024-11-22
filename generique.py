@@ -60,7 +60,7 @@ html_content = f"""
             display: flex;
             flex-direction: column;
             position: relative;
-            animation: scroll {len(phrases) * 3}s linear infinite;
+            transition: transform 0.5s ease-in-out;
         }}
 
         /* Styles des phrases */
@@ -82,12 +82,6 @@ html_content = f"""
             opacity: 1;
             transform: scale(1);
         }}
-
-        /* Animation keyframes */
-        @keyframes scroll {{
-            0% {{ transform: translateY(0); }}
-            100% {{ transform: translateY(-{scroll_height}px); }}
-        }}
     </style>
 
     <script>
@@ -103,7 +97,7 @@ html_content = f"""
             phraseElements.forEach(el => el.classList.remove("current"));
 
             // Déterminer l'index de la phrase centrale
-            const centralIndex = (currentIndex + Math.floor(totalPhrases / 2)) % totalPhrases;
+            const centralIndex = currentIndex % totalPhrases;
 
             // Ajouter la classe 'current' uniquement à la phrase centrale
             if (phraseElements[centralIndex]) {{
@@ -124,7 +118,7 @@ html_content = f"""
 
             // Déplacer le contenu
             const translateY = -currentIndex * {phrase_height};
-            scrollContent.style.transform = `translateY(${translateY}px)`;
+            scrollContent.style.transform = "translateY(" + translateY + "px)";
 
             // Mettre à jour les phrases
             updatePhrases();
