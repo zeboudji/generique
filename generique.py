@@ -1,7 +1,7 @@
 import streamlit as st
 
 # Configuration de la page
-st.set_page_config(page_title="Défilement Continu", layout="centered")
+st.set_page_config(page_title="Effet Texte Inversé", layout="centered")
 
 # Liste de vos phrases
 phrases = [
@@ -23,48 +23,56 @@ phrases = [
     "Pourtant..."
 ]
 
-# Générer le contenu HTML pour les phrases
-phrases_html = "<br>".join(phrases * 3)  # Répéter les phrases pour une boucle infinie
+# État initial
+if 'index' not in st.session_state:
+    st.session_state.index = 0
+    st.session_state.forward = True
 
-# Ajouter le style CSS pour l'animation
-st.markdown(f"""
+# Fonction pour afficher la phrase actuelle
+def show_phrase():
+    st.markdown(f"<h2 style='text-align: center;'>{phrases[st.session_state.index]}</h2>", unsafe_allow_html=True)
+
+# Gestion des événements du clavier
+def key_event():
+    key = st.session_state.key_pressed
+    if key == "Left":
+        if st.session_state.forward:
+            st.session_state.index -= 1
+            if st.session_state.index < 0:
+                st.session_state.index = 0
+        else:
+            st.session_state.index += 1
+            if st.session_state.index >= len(phrases):
+                st.session_state.index = len(phrases) - 1
+    elif key == "Right":
+        if st.session_state.forward:
+            st.session_state.index += 1
+            if st.session_state.index >= len(phrases):
+                st.session_state.index = len(phrases) - 1
+        else:
+            st.session_state.index -= 1
+            if st.session_state.index < 0:
+                st.session_state.index = 0
+    st.experimental_rerun()
+
+# Champ texte invisible pour capter les touches
+st.text_input("", key="key_pressed", on_change=key_event)
+
+# Cacher le champ texte
+st.markdown("""
     <style>
-    .scroll-container {{
-        position: relative;
-        height: 200px;  /* Ajustez la hauteur selon vos besoins */
-        overflow: hidden;
-        border: 2px solid #f0f0f0;
-        border-radius: 10px;
-        background-color: #ffffff;
-    }}
-    .scroll-content {{
-        display: inline-block;
+    div[data-testid="stTextInput"] > div > input {
         position: absolute;
-        width: 100%;
-        animation: scrollUp 20s linear infinite;
-    }}
-    .scroll-content p {{
-        text-align: center;
-        font-size: 18px;
-        padding: 10px 0;
-        margin: 0;
-    }}
-    @keyframes scrollUp {{
-        0% {{
-            top: 0;
-        }}
-        100% {{
-            top: -{len(phrases) * 40}px; /* Ajustez le pixel en fonction de la hauteur des éléments */
-        }}
-    }}
+        opacity: 0;
+    }
     </style>
-    
-    <div class="scroll-container">
-        <div class="scroll-content">
-            <p>{phrases_html}</p>
-        </div>
-    </div>
     """, unsafe_allow_html=True)
 
-# Optionnel : Ajouter un espace ou d'autres éléments de la page
-st.write("Bienvenue sur la page de défilement continu des phrases !")
+# Affichage de la phrase actuelle
+show_phrase()
+
+# Vérifier si on a atteint la fin ou le début pour inverser le sens
+if st.session_state.forward and st.session_state.index == len(phrases) - 1:
+    st.session_state.forward = False
+elif not st.session_state.forward and st.session_state.index == 0:
+    st.session_state.forward = True
