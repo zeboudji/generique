@@ -134,4 +134,4 @@ html_content = f"""
 """
 
 # Intégrer le contenu HTML/CSS/JS dans l'application Streamlit
-components.html(html_content, height=420)
+components.html(html_content, height=420, width=420)
