@@ -1,4 +1,12 @@
 import streamlit as st
+from streamlit_autorefresh import st_autorefresh  # Assurez-vous d'ajouter cette bibliothèque
+import time
+
+# Installation de la bibliothèque streamlit_autorefresh
+# Vous devez ajouter 'streamlit-autorefresh' à votre fichier requirements.txt
+# Requirements.txt:
+# streamlit
+# streamlit-autorefresh
 
 # Configuration de la page
 st.set_page_config(page_title="Effet Texte Inversé", layout="centered")
@@ -23,116 +31,60 @@ phrases = [
     "Pourtant..."
 ]
 
-# Convertir la liste des phrases en format JavaScript
-phrases_js = "[\"" + "\", \"".join(phrases) + "\"]"
+# Initialisation complète de st.session_state
+if 'index' not in st.session_state:
+    st.session_state.index = 0
+if 'forward' not in st.session_state:
+    st.session_state.forward = True
 
-# Intégrer le composant HTML avec JavaScript et CSS
-st.markdown(f"""
-    <div id="text-container">
-        <div class="phrase previous">&nbsp;</div>
-        <div class="phrase current"></div>
-        <div class="phrase next">&nbsp;</div>
-    </div>
+# Utilisation de st_autorefresh pour rafraîchir l'application toutes les 3 secondes
+count = st_autorefresh(interval=3 * 1000, key="auto_refresh")
 
-    <style>
-        #text-container {{
-            position: relative;
-            width: 80%;
-            margin: 0 auto;
-            height: 100px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }}
-        .phrase {{
-            position: absolute;
-            width: 100%;
-            text-align: center;
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
-        }}
-        .current {{
-            font-size: 24px;
-            opacity: 1;
-            transform: translateY(0);
-        }}
-        .previous, .next {{
-            font-size: 16px;
-            opacity: 0.6;
-        }}
-        .previous {{
-            transform: translateY(-30px);
-        }}
-        .next {{
-            transform: translateY(30px);
-        }}
-    </style>
+# Fonction pour afficher les phrases avec le formatage
+def show_phrases():
+    # Conteneur pour l'animation
+    container = st.empty()
+    with container.container():
+        # Phrase précédente
+        if st.session_state.index > 0:
+            st.markdown(f"<p style='text-align: center; font-size:16px; opacity:0.6;'>{phrases[st.session_state.index - 1]}</p>", unsafe_allow_html=True)
+        else:
+            st.markdown("<p style='text-align: center; font-size:16px; opacity:0.6;'>&nbsp;</p>", unsafe_allow_html=True)
+        
+        # Phrase actuelle
+        st.markdown(f"<h2 style='text-align: center; animation: fadeIn 1s;'>{phrases[st.session_state.index]}</h2>", unsafe_allow_html=True)
+        
+        # Phrase suivante
+        if st.session_state.index < len(phrases) - 1:
+            st.markdown(f"<p style='text-align: center; font-size:16px; opacity:0.6;'>{phrases[st.session_state.index + 1]}</p>", unsafe_allow_html=True)
+        else:
+            st.markdown("<p style='text-align: center; font-size:16px; opacity:0.6;'>&nbsp;</p>", unsafe_allow_html=True)
+        
+        # Style pour l'animation
+        st.markdown("""
+            <style>
+            @keyframes fadeIn {
+                from {opacity: 0;}
+                to {opacity: 1;}
+            }
+            </style>
+            """, unsafe_allow_html=True)
 
-    <script>
-        const phrases = {phrases_js};
-        let index = 0;
-        let forward = true;
-        const container = document.getElementById("text-container");
-        const current = container.querySelector(".current");
-        const previous = container.querySelector(".previous");
-        const next = container.querySelector(".next");
+# Fonction pour mettre à jour l'index
+def update_index():
+    if st.session_state.forward:
+        st.session_state.index += 1
+        if st.session_state.index >= len(phrases):
+            st.session_state.index = len(phrases) - 1
+            st.session_state.forward = False
+    else:
+        st.session_state.index -= 1
+        if st.session_state.index < 0:
+            st.session_state.index = 0
+            st.session_state.forward = True
 
-        function updatePhrases() {{
-            // Pré-animation: réduire l'opacité et déplacer légèrement les phrases
-            current.style.opacity = 0;
-            previous.style.opacity = 0;
-            next.style.opacity = 0;
-            previous.style.transform = "translateY(-20px)";
-            next.style.transform = "translateY(20px)";
-            
-            setTimeout(() => {{
-                // Mettre à jour le contenu
-                current.textContent = phrases[index];
-                if (index > 0) {{
-                    previous.textContent = phrases[index - 1];
-                }} else {{
-                    previous.innerHTML = "&nbsp;";
-                }}
-                if (index < phrases.length - 1) {{
-                    next.textContent = phrases[index + 1];
-                }} else {{
-                    next.innerHTML = "&nbsp;";
-                }}
+# Mettre à jour l'index à chaque rafraîchissement
+update_index()
 
-                // Ré-animer pour afficher les nouvelles phrases
-                current.style.opacity = 1;
-                previous.style.opacity = 0.6;
-                next.style.opacity = 0.6;
-                previous.style.transform = "translateY(-30px)";
-                next.style.transform = "translateY(30px)";
-            }}, 500); // Temps de la pré-animation
-        }}
-
-        function changePhrase() {{
-            if (forward) {{
-                if (index < phrases.length - 1) {{
-                    index += 1;
-                }} else {{
-                    forward = false;
-                    index -= 1;
-                }}
-            }} else {{
-                if (index > 0) {{
-                    index -= 1;
-                }} else {{
-                    forward = true;
-                    index += 1;
-                }}
-            }}
-            updatePhrases();
-        }}
-
-        // Initial display
-        updatePhrases();
-
-        // Rafraîchir toutes les 2 secondes
-        setInterval(changePhrase, 2000);
-    </script>
-    """, unsafe_allow_html=True)
+# Afficher les phrases avec animation
+show_phrases()
