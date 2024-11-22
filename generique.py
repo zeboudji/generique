@@ -25,20 +25,26 @@ phrases = [
     "Pourtant..."
 ]
 
+# Trouver l'index de "Pourtant..."
+pourtant_index = phrases.index("Pourtant...")
+
+# Créer une nouvelle liste de phrases à partir de "Pourtant..."
+phrases_scrolling = phrases[pourtant_index+1:] + phrases[:pourtant_index+1]
+
 # Sérialiser les phrases pour le JavaScript
-phrases_js = json.dumps(phrases)
+phrases_js = json.dumps(phrases_scrolling)
 
 # Calcul des dimensions
 phrase_height = 50  # Hauteur de chaque phrase en pixels
-visible_phrases = 3  # Nombre de phrases visibles
+visible_phrases = 3  # Nombre de phrases visibles (doit être impair pour avoir une phrase centrale)
 scroll_duration = 30  # Durée totale du défilement (en secondes)
 
 # HTML avec CSS et JavaScript
 html_content = f"""
     <div id="scroll-container">
         <div id="scroll-content">
-            {"".join([f'<div class="phrase">{phrase}</div>' for phrase in phrases])}
-            {"".join([f'<div class="phrase">{phrase}</div>' for phrase in phrases])} <!-- Duplication pour boucle infinie -->
+            {"".join([f'<div class="phrase">{phrase}</div>' for phrase in phrases_scrolling])}
+            {"".join([f'<div class="phrase">{phrase}</div>' for phrase in phrases_scrolling])} <!-- Duplication pour boucle infinie -->
         </div>
     </div>
 
@@ -60,40 +66,34 @@ html_content = f"""
             display: flex;
             flex-direction: column;
             position: relative;
-            animation: scroll {scroll_duration}s linear infinite;
+            will-change: transform;
         }}
 
         /* Styles des phrases */
         .phrase {{
             width: 100%;
             text-align: center;
-            font-size: 14px;
+            font-size: 16px;
             height: {phrase_height}px;
             line-height: {phrase_height}px;
-            opacity: 0.3;
-            transform: scale(0.8);
+            opacity: 0.5;
+            transform: scale(0.9);
             transition: all 0.5s ease-in-out;
         }}
 
         /* Style pour la phrase centrale */
         .current {{
-            font-size: 28px;
+            font-size: 24px;
             font-weight: bold;
             opacity: 1;
-            transform: scale(1.2);
-        }}
-
-        /* Keyframes pour le défilement fluide */
-        @keyframes scroll {{
-            0% {{ transform: translateY(0); }}
-            100% {{ transform: translateY(-{len(phrases) * phrase_height}px); }}
+            transform: scale(1.1);
         }}
     </style>
 
     <script>
         const scrollContent = document.getElementById("scroll-content");
         const phraseElements = document.querySelectorAll(".phrase");
-        const totalPhrases = {len(phrases)};
+        const totalPhrases = {len(phrases_scrolling)};
         const phraseHeight = {phrase_height};
         let offset = 0;
 
@@ -101,13 +101,10 @@ html_content = f"""
         function updateStyles() {{
             phraseElements.forEach((el, index) => {{
                 el.classList.remove("current");
-
-                // Calculer l'index de la phrase centrale visible
-                const centerIndex = (offset + Math.floor({visible_phrases} / 2)) % totalPhrases;
-                if (index === centerIndex) {{
-                    el.classList.add("current");
-                }}
             }});
+
+            const centerIndex = (offset + Math.floor({visible_phrases} / 2)) % totalPhrases;
+            phraseElements[centerIndex].classList.add("current");
         }}
 
         // Fonction de défilement automatique
@@ -115,25 +112,27 @@ html_content = f"""
             offset++;
             const translateY = -offset * phraseHeight;
 
+            scrollContent.style.transition = "transform 0.5s ease-in-out";
+            scrollContent.style.transform = "translateY(" + translateY + "px)";
+
             // Réinitialisation pour un défilement fluide
             if (offset >= totalPhrases) {{
-                offset = 0; // Réinitialiser à zéro
-                scrollContent.style.transition = "none"; // Désactiver temporairement la transition
-                scrollContent.style.transform = "translateY(0px)"; // Retour en haut
-                void scrollContent.offsetWidth; // Forcer un reflow
-                scrollContent.style.transition = "transform 0.5s ease-in-out"; // Réactiver la transition
-            }} else {{
-                scrollContent.style.transform = "translateY(" + translateY + "px)";
+                setTimeout(() => {{
+                    scrollContent.style.transition = "none";
+                    scrollContent.style.transform = "translateY(0px)";
+                    offset = 0;
+                    updateStyles();
+                }}, 500); // Attendre la fin de la transition avant de réinitialiser
             }}
 
             updateStyles();
         }}
 
         // Démarrer l'animation
-        setInterval(scroll, 1000); // Défilement toutes les secondes
+        setInterval(scroll, 2000); // Défilement toutes les 2 secondes
         updateStyles(); // Initialisation des styles
     </script>
 """
 
 # Intégrer le HTML dans Streamlit
-components.html(html_content, height=300, width=600)
+components.html(html_content, height=phrase_height * visible_phrases, width=700)
