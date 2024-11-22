@@ -1,5 +1,12 @@
 import streamlit as st
+from streamlit_autorefresh import st_autorefresh  # Assurez-vous d'ajouter cette bibliothèque
 import time
+
+# Installation de la bibliothèque streamlit_autorefresh
+# Vous devez ajouter 'streamlit-autorefresh' à votre fichier requirements.txt
+# Requirements.txt:
+# streamlit
+# streamlit-autorefresh
 
 # Configuration de la page
 st.set_page_config(page_title="Effet Texte Inversé", layout="centered")
@@ -24,11 +31,14 @@ phrases = [
     "Pourtant..."
 ]
 
-# État initial
+# Initialisation complète de st.session_state
 if 'index' not in st.session_state:
     st.session_state.index = 0
+if 'forward' not in st.session_state:
     st.session_state.forward = True
-    st.session_state.last_update = time.time()
+
+# Utilisation de st_autorefresh pour rafraîchir l'application toutes les 3 secondes
+count = st_autorefresh(interval=3 * 1000, key="auto_refresh")
 
 # Fonction pour afficher les phrases avec le formatage
 def show_phrases():
@@ -40,13 +50,16 @@ def show_phrases():
             st.markdown(f"<p style='text-align: center; font-size:16px; opacity:0.6;'>{phrases[st.session_state.index - 1]}</p>", unsafe_allow_html=True)
         else:
             st.markdown("<p style='text-align: center; font-size:16px; opacity:0.6;'>&nbsp;</p>", unsafe_allow_html=True)
+        
         # Phrase actuelle
         st.markdown(f"<h2 style='text-align: center; animation: fadeIn 1s;'>{phrases[st.session_state.index]}</h2>", unsafe_allow_html=True)
+        
         # Phrase suivante
         if st.session_state.index < len(phrases) - 1:
             st.markdown(f"<p style='text-align: center; font-size:16px; opacity:0.6;'>{phrases[st.session_state.index + 1]}</p>", unsafe_allow_html=True)
         else:
             st.markdown("<p style='text-align: center; font-size:16px; opacity:0.6;'>&nbsp;</p>", unsafe_allow_html=True)
+        
         # Style pour l'animation
         st.markdown("""
             <style>
@@ -70,11 +83,8 @@ def update_index():
             st.session_state.index = 0
             st.session_state.forward = True
 
-# Afficher les phrases
-show_phrases()
+# Mettre à jour l'index à chaque rafraîchissement
+update_index()
 
-# Vérifier si 3 secondes se sont écoulées depuis la dernière mise à jour
-if time.time() - st.session_state.last_update > 3:
-    update_index()
-    st.session_state.last_update = time.time()
-    st.experimental_rerun()
+# Afficher les phrases avec animation
+show_phrases()
