@@ -1,5 +1,5 @@
 import streamlit as st
-import streamlit.components.v1 as components
+import time
 
 # Configuration de la page
 st.set_page_config(page_title="Effet Texte Inversé", layout="centered")
@@ -28,6 +28,7 @@ phrases = [
 if 'index' not in st.session_state:
     st.session_state.index = 0
     st.session_state.forward = True
+    st.session_state.last_update = time.time()
 
 # Fonction pour afficher les phrases avec le formatage
 def show_phrases():
@@ -40,7 +41,7 @@ def show_phrases():
         else:
             st.markdown("<p style='text-align: center; font-size:16px; opacity:0.6;'>&nbsp;</p>", unsafe_allow_html=True)
         # Phrase actuelle
-        st.markdown(f"<h2 style='text-align: center; animation: fadeIn 0.5s;'>{phrases[st.session_state.index]}</h2>", unsafe_allow_html=True)
+        st.markdown(f"<h2 style='text-align: center; animation: fadeIn 1s;'>{phrases[st.session_state.index]}</h2>", unsafe_allow_html=True)
         # Phrase suivante
         if st.session_state.index < len(phrases) - 1:
             st.markdown(f"<p style='text-align: center; font-size:16px; opacity:0.6;'>{phrases[st.session_state.index + 1]}</p>", unsafe_allow_html=True)
@@ -56,64 +57,24 @@ def show_phrases():
             </style>
             """, unsafe_allow_html=True)
 
-# Gestion des événements du clavier avec JavaScript
-components.html(
-    """
-    <input type="text" id="key_input" style="opacity:0; position:absolute; left:0; top:0; height:0; width:0;">
-    <script>
-    const input = document.getElementById("key_input");
-    input.focus();
-    document.addEventListener("click", function(){
-        const input = document.getElementById("key_input");
-        input.focus();
-    });
-    document.addEventListener('keydown', function(e) {
-        const arrows = ['ArrowLeft', 'ArrowRight'];
-        if (arrows.includes(e.key)) {
-            const key = e.key === 'ArrowLeft' ? 'Left' : 'Right';
-            fetch('/?key=' + key);
-        }
-    });
-    </script>
-    """,
-    height=0,
-    width=0
-)
+# Fonction pour mettre à jour l'index
+def update_index():
+    if st.session_state.forward:
+        st.session_state.index += 1
+        if st.session_state.index >= len(phrases):
+            st.session_state.index = len(phrases) - 1
+            st.session_state.forward = False
+    else:
+        st.session_state.index -= 1
+        if st.session_state.index < 0:
+            st.session_state.index = 0
+            st.session_state.forward = True
 
-# Récupérer la clé depuis les paramètres de l'URL
-params = st.experimental_get_query_params()
-key = params.get('key', [None])[0]
-
-if key:
-    if key == "Left":
-        if st.session_state.forward:
-            st.session_state.index -= 1
-            if st.session_state.index < 0:
-                st.session_state.index = 0
-        else:
-            st.session_state.index += 1
-            if st.session_state.index >= len(phrases):
-                st.session_state.index = len(phrases) - 1
-    elif key == "Right":
-        if st.session_state.forward:
-            st.session_state.index += 1
-            if st.session_state.index >= len(phrases):
-                st.session_state.index = len(phrases) - 1
-        else:
-            st.session_state.index -= 1
-            if st.session_state.index < 0:
-                st.session_state.index = 0
-
-    # Nettoyer le paramètre 'key' de l'URL
-    st.experimental_set_query_params()
-
-    # Vérifier si on a atteint la fin ou le début pour inverser le sens
-    if st.session_state.forward and st.session_state.index == len(phrases) - 1:
-        st.session_state.forward = False
-    elif not st.session_state.forward and st.session_state.index == 0:
-        st.session_state.forward = True
-
-    st.experimental_rerun()
-
-# Affichage des phrases avec animation
+# Afficher les phrases
 show_phrases()
+
+# Vérifier si 3 secondes se sont écoulées depuis la dernière mise à jour
+if time.time() - st.session_state.last_update > 3:
+    update_index()
+    st.session_state.last_update = time.time()
+    st.experimental_rerun()
