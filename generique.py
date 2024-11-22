@@ -28,17 +28,22 @@ phrases = [
 # Sérialiser les phrases en format JSON pour JavaScript
 phrases_js = json.dumps(phrases)
 
+# Calculer la hauteur totale du scroll-content
+phrase_height = 40  # Hauteur de chaque phrase en pixels
+total_phrases = len(phrases)
+scroll_height = total_phrases * phrase_height
+
 # Contenu HTML avec CSS et JavaScript intégrés
 html_content = f"""
     <div id="scroll-container">
         <div id="scroll-content">
             {"".join([f'<div class="phrase">{phrase}</div>' for phrase in phrases])}
-            <!-- Répéter les phrases pour une boucle infinie -->
-            {"".join([f'<div class="phrase">{phrase}</div>' for phrase in phrases])}
+            {"".join([f'<div class="phrase">{phrase}</div>' for phrase in phrases])} <!-- Duplication pour boucle infinie -->
         </div>
     </div>
 
     <style>
+        /* Conteneur principal */
         #scroll-container {{
             position: relative;
             width: 80%;
@@ -49,7 +54,10 @@ html_content = f"""
             display: flex;
             align-items: center;
             justify-content: center;
+            border: none; /* Pas de bordure */
         }}
+
+        /* Contenu défilant */
         #scroll-content {{
             display: flex;
             flex-direction: column;
@@ -58,6 +66,8 @@ html_content = f"""
             left: 0;
             transition: transform 0.5s ease-in-out;
         }}
+
+        /* Styles des phrases */
         .phrase {{
             width: 100%;
             text-align: center;
@@ -66,8 +76,10 @@ html_content = f"""
             line-height: 40px;
             box-sizing: border-box;
             opacity: 0.6;
-            transition: all 0.5s ease-in-out;
+            transition: all 0.3s ease-in-out;
         }}
+
+        /* Style de la phrase centrale */
         .current {{
             font-size: 24px;
             opacity: 1;
@@ -80,7 +92,7 @@ html_content = f"""
         const scrollContent = document.getElementById("scroll-content");
         const phraseElements = document.querySelectorAll(".phrase");
 
-        const totalPhrases = {len(phrases)};
+        const totalPhrases = {total_phrases};
         let currentIndex = 0;
 
         // Initialisation
@@ -98,12 +110,21 @@ html_content = f"""
 
             // Calculer la nouvelle position
             const translateY = -currentIndex * 40; // 40px est la hauteur de chaque phrase
-            scrollContent.style.transform = `translateY(${translateY}px)`;
+            scrollContent.style.transform = `translateY(${{translateY}}px)`;
         }}
 
         // Fonction pour passer à la phrase suivante
         function nextPhrase() {{
-            currentIndex = (currentIndex + 1) % totalPhrases;
+            currentIndex += 1;
+            if (currentIndex >= totalPhrases) {{
+                // Réinitialiser pour la boucle infinie
+                currentIndex = 0;
+                scrollContent.style.transition = 'none'; // Désactiver la transition pour réinitialiser instantanément
+                scrollContent.style.transform = 'translateY(0px)';
+                // Forcer le reflow pour que le changement soit pris en compte
+                void scrollContent.offsetWidth;
+                scrollContent.style.transition = 'transform 0.5s ease-in-out';
+            }}
             updatePhrases();
         }}
 
