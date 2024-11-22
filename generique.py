@@ -1,5 +1,5 @@
 import streamlit as st
-import time
+import streamlit.components.v1 as components
 
 # Configuration de la page
 st.set_page_config(page_title="Effet Texte Inversé", layout="centered")
@@ -56,9 +56,35 @@ def show_phrases():
             </style>
             """, unsafe_allow_html=True)
 
-# Gestion des événements du clavier
-def key_event():
-    key = st.session_state.key_pressed
+# Gestion des événements du clavier avec JavaScript
+components.html(
+    """
+    <input type="text" id="key_input" style="opacity:0; position:absolute; left:0; top:0; height:0; width:0;">
+    <script>
+    const input = document.getElementById("key_input");
+    input.focus();
+    document.addEventListener("click", function(){
+        const input = document.getElementById("key_input");
+        input.focus();
+    });
+    document.addEventListener('keydown', function(e) {
+        const arrows = ['ArrowLeft', 'ArrowRight'];
+        if (arrows.includes(e.key)) {
+            const key = e.key === 'ArrowLeft' ? 'Left' : 'Right';
+            fetch('/?key=' + key);
+        }
+    });
+    </script>
+    """,
+    height=0,
+    width=0
+)
+
+# Récupérer la clé depuis les paramètres de l'URL
+params = st.experimental_get_query_params()
+key = params.get('key', [None])[0]
+
+if key:
     if key == "Left":
         if st.session_state.forward:
             st.session_state.index -= 1
@@ -77,27 +103,17 @@ def key_event():
             st.session_state.index -= 1
             if st.session_state.index < 0:
                 st.session_state.index = 0
-    st.session_state.key_pressed = ""  # Réinitialiser la touche
+
+    # Nettoyer le paramètre 'key' de l'URL
+    st.experimental_set_query_params()
+
+    # Vérifier si on a atteint la fin ou le début pour inverser le sens
+    if st.session_state.forward and st.session_state.index == len(phrases) - 1:
+        st.session_state.forward = False
+    elif not st.session_state.forward and st.session_state.index == 0:
+        st.session_state.forward = True
+
     st.experimental_rerun()
-
-# Champ texte invisible pour capter les touches
-st.text_input("", key="key_pressed", on_change=key_event)
-
-# Cacher le champ texte
-st.markdown("""
-    <style>
-    div[data-testid="stTextInput"] > div > input {
-        position: absolute;
-        opacity: 0;
-    }
-    </style>
-    """, unsafe_allow_html=True)
 
 # Affichage des phrases avec animation
 show_phrases()
-
-# Vérifier si on a atteint la fin ou le début pour inverser le sens
-if st.session_state.forward and st.session_state.index == len(phrases) - 1:
-    st.session_state.forward = False
-elif not st.session_state.forward and st.session_state.index == 0:
-    st.session_state.forward = True
