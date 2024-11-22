@@ -64,7 +64,7 @@ html_content = f"""
             position: absolute;
             top: 0;
             left: 0;
-            animation: scroll {scroll_height / 20}s linear infinite; /* Durée calculée pour la fluidité */
+            transition: transform 0.5s ease-in-out;
         }}
 
         /* Styles des phrases */
@@ -85,16 +85,6 @@ html_content = f"""
             opacity: 1;
             transform: scale(1.2);
         }}
-
-        /* Animation keyframes pour le défilement */
-        @keyframes scroll {{
-            0% {{
-                transform: translateY(0);
-            }}
-            100% {{
-                transform: translateY(-{scroll_height}px);
-            }}
-        }}
     </style>
 
     <script>
@@ -105,26 +95,38 @@ html_content = f"""
         const totalPhrases = {total_phrases};
         let currentIndex = 0;
 
-        // Initialisation des phrases
+        // Initialisation
+        updatePhrases();
+
+        // Fonction pour mettre à jour les classes
         function updatePhrases() {{
             // Réinitialiser toutes les classes
             phraseElements.forEach(el => el.classList.remove("current"));
 
-            // Calculer l'indice de la phrase centrale
-            const currentPhraseIndex = currentIndex % totalPhrases;
-            if (phraseElements[currentPhraseIndex]) {{
-                phraseElements[currentPhraseIndex].classList.add("current");
+            // Ajouter la classe 'current' à la phrase centrale
+            if (phraseElements[currentIndex]) {{
+                phraseElements[currentIndex].classList.add("current");
             }}
+
+            // Calculer la nouvelle position
+            const translateY = -currentIndex * 40; // 40px est la hauteur de chaque phrase
+            scrollContent.style.transform = `translateY(${{translateY}}px)`;
         }}
 
         // Fonction pour passer à la phrase suivante
         function nextPhrase() {{
             currentIndex += 1;
+            if (currentIndex >= totalPhrases) {{
+                // Réinitialiser pour la boucle infinie
+                currentIndex = 0;
+                scrollContent.style.transition = 'none'; // Désactiver la transition pour réinitialiser instantanément
+                scrollContent.style.transform = 'translateY(0px)';
+                // Forcer le reflow pour que le changement soit pris en compte
+                void scrollContent.offsetWidth;
+                scrollContent.style.transition = 'transform 0.5s ease-in-out';
+            }}
             updatePhrases();
         }}
-
-        // Initialisation
-        updatePhrases();
 
         // Changer de phrase toutes les 3 secondes avec animation
         setInterval(nextPhrase, 3000); // Change phrase every 3 seconds
@@ -132,4 +134,4 @@ html_content = f"""
 """
 
 # Intégrer le contenu HTML/CSS/JS dans l'application Streamlit
-components.html(html_content, height=240)
+components.html(html_content, height=220)
