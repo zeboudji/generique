@@ -29,7 +29,7 @@ phrases = [
 phrases_js = json.dumps(phrases)
 
 # Calcul des dimensions
-phrase_height = 40  # Hauteur de chaque phrase en pixels
+phrase_height = 50  # Hauteur de chaque phrase en pixels
 visible_phrases = 3  # Nombre de phrases visibles
 scroll_duration = 10  # Durée totale du défilement (en secondes)
 
@@ -67,23 +67,23 @@ html_content = f"""
         .phrase {{
             width: 100%;
             text-align: center;
-            font-size: 16px;
+            font-size: 14px;
             height: {phrase_height}px;
             line-height: {phrase_height}px;
-            opacity: 0.4;
+            opacity: 0.3;
             transform: scale(0.8);
-            transition: all 0.3s ease-in-out;
+            transition: all 0.5s ease-in-out;
         }}
 
         /* Style pour la phrase centrale */
         .current {{
-            font-size: 24px;
+            font-size: 28px;
             font-weight: bold;
             opacity: 1;
-            transform: scale(1);
+            transform: scale(1.2);
         }}
 
-        /* Keyframes pour le défilement */
+        /* Keyframes pour le défilement fluide */
         @keyframes scroll {{
             0% {{ transform: translateY(0); }}
             100% {{ transform: translateY(-{len(phrases) * phrase_height}px); }}
@@ -121,7 +121,7 @@ html_content = f"""
                 scrollContent.style.transition = "none"; // Désactiver temporairement la transition
                 scrollContent.style.transform = "translateY(0px)"; // Retour en haut
                 void scrollContent.offsetWidth; // Forcer un reflow
-                scrollContent.style.transition = "transform 0.3s ease-in-out"; // Réactiver la transition
+                scrollContent.style.transition = "transform 0.5s ease-in-out"; // Réactiver la transition
             }} else {{
                 scrollContent.style.transform = "translateY(" + translateY + "px)";
             }}
