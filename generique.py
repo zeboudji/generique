@@ -3,7 +3,7 @@ import json
 import streamlit.components.v1 as components
 
 # Configuration de la page
-st.set_page_config(page_title="Effet Texte Inversé", layout="centered")
+st.set_page_config(page_title="Effet Texte Porsche", layout="centered")
 
 # Liste de vos phrases
 phrases = [
@@ -30,114 +30,68 @@ phrases_js = json.dumps(phrases)
 
 # Contenu HTML avec CSS et JavaScript intégrés
 html_content = f"""
-    <div id="text-container">
-        <div class="phrase previous">&nbsp;</div>
-        <div class="phrase current"></div>
-        <div class="phrase next">&nbsp;</div>
+    <div id="scroll-container">
+        <div id="scroll-content">
+            {"".join([f'<div class="phrase">{phrase}</div>' for phrase in phrases])}
+            <!-- Répéter les phrases pour une boucle infinie -->
+            {"".join([f'<div class="phrase">{phrase}</div>' for phrase in phrases])}
+        </div>
     </div>
 
     <style>
-        #text-container {{
+        #scroll-container {{
             position: relative;
             width: 80%;
+            height: 100px; /* Hauteur visible du conteneur */
             margin: 0 auto;
-            height: 100px;
+            overflow: hidden;
+            border: 2px solid #000; /* Optionnel : Bordure pour visualiser le conteneur */
+            background-color: #f9f9f9; /* Optionnel : Couleur de fond */
+        }}
+        #scroll-content {{
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
+            animation: scroll 30s linear infinite;
         }}
         .phrase {{
-            position: absolute;
             width: 100%;
             text-align: center;
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
-        }}
-        .current {{
             font-size: 24px;
-            opacity: 1;
-            transform: translateY(0);
+            padding: 10px 0;
+            box-sizing: border-box;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInOut 30s linear infinite;
         }}
-        .previous, .next {{
-            font-size: 16px;
-            opacity: 0.6;
+        @keyframes scroll {{
+            0% {{
+                transform: translateY(0);
+            }}
+            100% {{
+                transform: translateY(-50%);
+            }}
         }}
-        .previous {{
-            transform: translateY(-30px);
-        }}
-        .next {{
-            transform: translateY(30px);
+        @keyframes fadeInOut {{
+            0%, 100% {{ opacity: 0; }}
+            5%, 25% {{ opacity: 1; }}
         }}
     </style>
 
     <script>
-        const phrases = {phrases_js};
-        let index = 0;
-        let forward = true;
-        const container = document.getElementById("text-container");
-        const current = container.querySelector(".current");
-        const previous = container.querySelector(".previous");
-        const next = container.querySelector(".next");
+        // Ajuster la durée de l'animation en fonction du nombre de phrases
+        const totalPhrases = {len(phrases)};
+        const animationDuration = 30; // Durée totale de l'animation en secondes
 
-        function updatePhrases() {{
-            // Pré-animation : réduire l'opacité et déplacer légèrement les phrases
-            current.style.opacity = 0;
-            previous.style.opacity = 0;
-            next.style.opacity = 0;
-            previous.style.transform = "translateY(-20px)";
-            next.style.transform = "translateY(20px)";
+        const scrollContent = document.getElementById("scroll-content");
+        scrollContent.style.animation = `scroll ${animationDuration}s linear infinite`;
 
-            setTimeout(() => {{
-                // Mettre à jour le contenu
-                current.textContent = phrases[index];
-                if (index > 0) {{
-                    previous.textContent = phrases[index - 1];
-                }} else {{
-                    previous.innerHTML = "&nbsp;";
-                }}
-                if (index < phrases.length - 1) {{
-                    next.textContent = phrases[index + 1];
-                }} else {{
-                    next.innerHTML = "&nbsp;";
-                }}
-
-                // Ré-animer pour afficher les nouvelles phrases
-                current.style.opacity = 1;
-                previous.style.opacity = 0.6;
-                next.style.opacity = 0.6;
-                previous.style.transform = "translateY(-30px)";
-                next.style.transform = "translateY(30px)";
-            }}, 500); // Temps de la pré-animation
-        }}
-
-        function changePhrase() {{
-            if (forward) {{
-                if (index < phrases.length - 1) {{
-                    index += 1;
-                }} else {{
-                    forward = false;
-                    index -= 1;
-                }}
-            }} else {{
-                if (index > 0) {{
-                    index -= 1;
-                }} else {{
-                    forward = true;
-                    index += 1;
-                }}
-            }}
-            updatePhrases();
-        }}
-
-        // Affichage initial
-        updatePhrases();
-
-        // Changer de phrase toutes les 2 secondes
-        setInterval(changePhrase, 2000);
+        const phrasesElements = document.querySelectorAll(".phrase");
+        phrasesElements.forEach((el, index) => {{
+            el.style.animation = `fadeInOut ${animationDuration}s linear infinite`;
+            el.style.animationDelay = `${(index * animationDuration) / totalPhrases}s`;
+        }});
     </script>
 """
 
 # Intégrer le contenu HTML/CSS/JS dans l'application Streamlit
-components.html(html_content, height=200)
+components.html(html_content, height=220)
