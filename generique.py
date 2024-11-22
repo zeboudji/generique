@@ -1,4 +1,6 @@
 import streamlit as st
+import json
+import streamlit.components.v1 as components
 
 # Configuration de la page
 st.set_page_config(page_title="Effet Texte Inversé", layout="centered")
@@ -23,11 +25,11 @@ phrases = [
     "Pourtant..."
 ]
 
-# Convertir la liste des phrases en format JavaScript
-phrases_js = "[\"" + "\", \"".join(phrases) + "\"]"
+# Sérialiser les phrases en format JSON pour JavaScript
+phrases_js = json.dumps(phrases)
 
-# Intégrer le composant HTML avec JavaScript et CSS
-st.markdown(f"""
+# Contenu HTML avec CSS et JavaScript intégrés
+html_content = f"""
     <div id="text-container">
         <div class="phrase previous">&nbsp;</div>
         <div class="phrase current"></div>
@@ -80,13 +82,13 @@ st.markdown(f"""
         const next = container.querySelector(".next");
 
         function updatePhrases() {{
-            // Pré-animation: réduire l'opacité et déplacer légèrement les phrases
+            // Pré-animation : réduire l'opacité et déplacer légèrement les phrases
             current.style.opacity = 0;
             previous.style.opacity = 0;
             next.style.opacity = 0;
             previous.style.transform = "translateY(-20px)";
             next.style.transform = "translateY(20px)";
-            
+
             setTimeout(() => {{
                 // Mettre à jour le contenu
                 current.textContent = phrases[index];
@@ -129,10 +131,13 @@ st.markdown(f"""
             updatePhrases();
         }}
 
-        // Initial display
+        // Affichage initial
         updatePhrases();
 
-        // Rafraîchir toutes les 2 secondes
+        // Changer de phrase toutes les 2 secondes
         setInterval(changePhrase, 2000);
     </script>
-    """, unsafe_allow_html=True)
+"""
+
+# Intégrer le contenu HTML/CSS/JS dans l'application Streamlit
+components.html(html_content, height=200)
