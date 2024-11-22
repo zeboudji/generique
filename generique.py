@@ -30,7 +30,7 @@ phrases_js = json.dumps(phrases)
 
 # Calculer la hauteur totale du scroll-content
 phrase_height = 40  # Hauteur de chaque phrase en pixels
-visible_phrases = 3  # Nombre de phrases visibles en même temps
+visible_phrases = 3  # Nombre de phrases visibles
 scroll_height = len(phrases) * phrase_height
 
 # Contenu HTML avec CSS et JavaScript intégrés
@@ -48,7 +48,7 @@ html_content = f"""
             position: relative;
             width: 80%;
             margin: 0 auto;
-            height: {phrase_height * visible_phrases}px; /* Hauteur visible (3 phrases) */
+            height: {phrase_height * visible_phrases}px; /* Hauteur visible pour 3 phrases */
             overflow: hidden;
             display: flex;
             align-items: center;
@@ -70,35 +70,69 @@ html_content = f"""
             font-size: 16px;
             height: {phrase_height}px;
             line-height: {phrase_height}px;
-            opacity: 0.5;
+            opacity: 0.6;
             transform: scale(0.8);
-            transition: all 0.5s ease-in-out;
+            transition: all 0.3s ease-in-out;
         }}
 
         /* Style pour la phrase centrale */
-        .phrase:nth-child(3n+2) {{
+        .current {{
             font-size: 24px;
             font-weight: bold;
             opacity: 1;
             transform: scale(1);
         }}
+
+        /* Animation keyframes */
+        @keyframes scroll {{
+            0% {{ transform: translateY(0); }}
+            100% {{ transform: translateY(-{scroll_height}px); }}
+        }}
     </style>
 
     <script>
         const scrollContent = document.getElementById("scroll-content");
+        const phraseElements = document.querySelectorAll(".phrase");
 
-        // Boucle infinie via CSS animation
-        scrollContent.style.animation = `scroll {len(phrases) * 3}s linear infinite`;
+        const totalPhrases = {len(phrases)};
+        let currentIndex = 0;
 
-        // Keyframes CSS pour défilement fluide
-        const keyframes = document.createElement("style");
-        keyframes.innerHTML = `
-            @keyframes scroll {{
-                0% {{ transform: translateY(0); }}
-                100% {{ transform: translateY(-{scroll_height}px); }}
+        // Fonction pour mettre à jour les styles des phrases
+        function updatePhrases() {{
+            // Réinitialiser toutes les classes
+            phraseElements.forEach(el => el.classList.remove("current"));
+
+            // Déterminer l'index de la phrase centrale
+            const centralIndex = (currentIndex + Math.floor(totalPhrases / 2)) % totalPhrases;
+
+            // Ajouter la classe 'current' uniquement à la phrase centrale
+            if (phraseElements[centralIndex]) {{
+                phraseElements[centralIndex].classList.add("current");
             }}
-        `;
-        document.head.appendChild(keyframes);
+        }}
+
+        // Fonction de défilement automatique
+        function scroll() {{
+            currentIndex += 1;
+            if (currentIndex >= totalPhrases) {{
+                currentIndex = 0; // Réinitialisation en boucle
+                scrollContent.style.transition = 'none'; // Désactiver temporairement la transition
+                scrollContent.style.transform = 'translateY(0px)'; // Réinitialisation instantanée
+                void scrollContent.offsetWidth; // Forcer un reflow pour appliquer les changements
+                scrollContent.style.transition = 'transform 0.5s ease-in-out'; // Réactiver la transition
+            }}
+
+            // Déplacer le contenu
+            const translateY = -currentIndex * {phrase_height};
+            scrollContent.style.transform = `translateY(${translateY}px)`;
+
+            // Mettre à jour les phrases
+            updatePhrases();
+        }}
+
+        // Initialisation
+        updatePhrases();
+        setInterval(scroll, 3000); // Défilement toutes les 3 secondes
     </script>
 """
 
