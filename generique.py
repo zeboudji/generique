@@ -50,6 +50,7 @@ st.markdown(f"""
             position: absolute;
             width: 100%;
             text-align: center;
+            opacity: 0;
             transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
         }}
         .current {{
@@ -79,17 +80,34 @@ st.markdown(f"""
         const next = container.querySelector(".next");
 
         function updatePhrases() {{
-            current.textContent = phrases[index];
-            if (index > 0) {{
-                previous.textContent = phrases[index - 1];
-            }} else {{
-                previous.innerHTML = "&nbsp;";
-            }}
-            if (index < phrases.length - 1) {{
-                next.textContent = phrases[index + 1];
-            }} else {{
-                next.innerHTML = "&nbsp;";
-            }}
+            // Pré-animation: réduire l'opacité et déplacer légèrement les phrases
+            current.style.opacity = 0;
+            previous.style.opacity = 0;
+            next.style.opacity = 0;
+            previous.style.transform = "translateY(-20px)";
+            next.style.transform = "translateY(20px)";
+            
+            setTimeout(() => {{
+                // Mettre à jour le contenu
+                current.textContent = phrases[index];
+                if (index > 0) {{
+                    previous.textContent = phrases[index - 1];
+                }} else {{
+                    previous.innerHTML = "&nbsp;";
+                }}
+                if (index < phrases.length - 1) {{
+                    next.textContent = phrases[index + 1];
+                }} else {{
+                    next.innerHTML = "&nbsp;";
+                }}
+
+                // Ré-animer pour afficher les nouvelles phrases
+                current.style.opacity = 1;
+                previous.style.opacity = 0.6;
+                next.style.opacity = 0.6;
+                previous.style.transform = "translateY(-30px)";
+                next.style.transform = "translateY(30px)";
+            }}, 500); // Temps de la pré-animation
         }}
 
         function changePhrase() {{
