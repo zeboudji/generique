@@ -31,9 +31,11 @@ phrases_js = json.dumps(phrases)
 # Contenu HTML avec CSS et JavaScript intégrés
 html_content = f"""
     <div id="scroll-container">
-        <div class="phrase previous">&nbsp;</div>
-        <div class="phrase current"></div>
-        <div class="phrase next">&nbsp;</div>
+        <div id="scroll-content">
+            {"".join([f'<div class="phrase">{phrase}</div>' for phrase in phrases])}
+            <!-- Répéter les phrases pour une boucle infinie -->
+            {"".join([f'<div class="phrase">{phrase}</div>' for phrase in phrases])}
+        </div>
     </div>
 
     <style>
@@ -41,86 +43,69 @@ html_content = f"""
             position: relative;
             width: 80%;
             margin: 0 auto;
-            height: 120px; /* Hauteur visible du conteneur */
+            height: 120px; /* Hauteur visible du conteneur (3 phrases * 40px) */
             overflow: hidden;
             background-color: #ffffff; /* Couleur de fond */
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
+        }}
+        #scroll-content {{
+            display: flex;
+            flex-direction: column;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transition: transform 0.5s ease-in-out;
         }}
         .phrase {{
             width: 100%;
             text-align: center;
             font-size: 16px;
+            height: 40px;
+            line-height: 40px;
+            box-sizing: border-box;
             opacity: 0.6;
             transition: all 0.5s ease-in-out;
-            position: absolute;
-            left: 0;
         }}
         .current {{
             font-size: 24px;
             opacity: 1;
-            transform: translateY(0px) scale(1.2);
-        }}
-        .previous {{
-            transform: translateY(-30px) scale(1);
-        }}
-        .next {{
-            transform: translateY(30px) scale(1);
+            transform: scale(1.2);
         }}
     </style>
 
     <script>
         const phrases = {phrases_js};
-        let index = 0;
-        const totalPhrases = phrases.length;
+        const scrollContent = document.getElementById("scroll-content");
+        const phraseElements = document.querySelectorAll(".phrase");
 
-        const currentEl = document.querySelector('.current');
-        let previousEl = document.querySelector('.previous');
-        let nextEl = document.querySelector('.next');
-
-        function updatePhrases() {{
-            currentEl.textContent = phrases[index];
-            previousEl.textContent = phrases[(index - 1 + totalPhrases) % totalPhrases];
-            nextEl.textContent = phrases[(index + 1) % totalPhrases];
-        }}
-
-        function nextPhrase() {{
-            // Retirer les classes actuelles
-            currentEl.classList.remove('current');
-            previousEl.classList.remove('previous');
-            nextEl.classList.remove('next');
-
-            // Ajouter les nouvelles classes
-            currentEl.classList.add('previous');
-            nextEl.classList.add('current');
-
-            // Mettre à jour l'index
-            index = (index + 1) % totalPhrases;
-
-            // Mettre à jour les phrases
-            updatePhrases();
-
-            // Après la transition, réassigner les classes
-            setTimeout(() => {{
-                // Retirer les anciennes classes
-                currentEl.classList.remove('previous');
-                previousEl.classList.remove('previous');
-
-                // Swap les éléments
-                let temp = previousEl;
-                previousEl = currentEl;
-                currentEl = nextEl;
-                nextEl = temp;
-
-                // Mettre à jour la classe 'next' pour le nouvel élément suivant
-                nextEl.classList.add('next');
-            }}, 500); // Durée de la transition (0.5s)
-        }}
+        const totalPhrases = {len(phrases)};
+        let currentIndex = 0;
 
         // Initialisation
         updatePhrases();
+
+        // Fonction pour mettre à jour les classes
+        function updatePhrases() {{
+            // Réinitialiser toutes les classes
+            phraseElements.forEach(el => el.classList.remove("current"));
+
+            // Ajouter la classe 'current' à la phrase centrale
+            if (phraseElements[currentIndex]) {{
+                phraseElements[currentIndex].classList.add("current");
+            }}
+
+            // Calculer la nouvelle position
+            const translateY = -currentIndex * 40; // 40px est la hauteur de chaque phrase
+            scrollContent.style.transform = `translateY(${translateY}px)`;
+        }}
+
+        // Fonction pour passer à la phrase suivante
+        function nextPhrase() {{
+            currentIndex = (currentIndex + 1) % totalPhrases;
+            updatePhrases();
+        }}
 
         // Changer de phrase toutes les 3 secondes avec animation
         setInterval(nextPhrase, 3000); // Change phrase every 3 seconds
