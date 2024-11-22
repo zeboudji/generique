@@ -5,7 +5,7 @@ import streamlit.components.v1 as components
 # Configuration de la page
 st.set_page_config(page_title="Effet Texte Porsche", layout="centered")
 
-# Liste de vos phrases
+# Liste des phrases
 phrases = [
     "La nouvelle offre d’acculturation à l’IA d’Inside est lancée.",
     "Après 10 ans d’expertise dans la transformation digitale.",
@@ -25,15 +25,15 @@ phrases = [
     "Pourtant..."
 ]
 
-# Sérialiser les phrases en format JSON pour JavaScript
+# Sérialiser les phrases pour le JavaScript
 phrases_js = json.dumps(phrases)
 
-# Calculer la hauteur totale du scroll-content
+# Calcul des dimensions
 phrase_height = 40  # Hauteur de chaque phrase en pixels
-visible_phrases = 3  # Nombre de phrases visibles (1 centrale et 2 secondaires)
+visible_phrases = 3  # Nombre de phrases visibles
 scroll_duration = 10  # Durée totale du défilement (en secondes)
 
-# Contenu HTML avec CSS et JavaScript intégrés
+# HTML avec CSS et JavaScript
 html_content = f"""
     <div id="scroll-container">
         <div id="scroll-content">
@@ -48,7 +48,7 @@ html_content = f"""
             position: relative;
             width: 80%;
             margin: 0 auto;
-            height: {phrase_height * visible_phrases}px; /* Hauteur visible pour 3 phrases */
+            height: {phrase_height * visible_phrases}px; /* Hauteur visible (3 phrases) */
             overflow: hidden;
             display: flex;
             align-items: center;
@@ -70,7 +70,7 @@ html_content = f"""
             font-size: 16px;
             height: {phrase_height}px;
             line-height: {phrase_height}px;
-            opacity: 0.6;
+            opacity: 0.4;
             transform: scale(0.8);
             transition: all 0.3s ease-in-out;
         }}
@@ -83,7 +83,7 @@ html_content = f"""
             transform: scale(1);
         }}
 
-        /* Animation keyframes pour un défilement fluide */
+        /* Keyframes pour le défilement */
         @keyframes scroll {{
             0% {{ transform: translateY(0); }}
             100% {{ transform: translateY(-{len(phrases) * phrase_height}px); }}
@@ -102,26 +102,26 @@ html_content = f"""
             phraseElements.forEach((el, index) => {{
                 el.classList.remove("current");
 
-                // Calculer la distance de la phrase par rapport au centre
-                const distanceFromCenter = Math.abs(index - (offset % totalPhrases));
-                if (distanceFromCenter === 0) {{
-                    el.classList.add("current"); // Phrase au centre
+                // Calculer l'index de la phrase centrale visible
+                const centerIndex = (offset + Math.floor({visible_phrases} / 2)) % totalPhrases;
+                if (index === centerIndex) {{
+                    el.classList.add("current");
                 }}
             }});
         }}
 
-        // Boucle infinie de mise à jour
+        // Fonction de défilement automatique
         function scroll() {{
             offset++;
             const translateY = -offset * phraseHeight;
 
             // Réinitialisation pour un défilement fluide
             if (offset >= totalPhrases) {{
-                offset = 0;
-                scrollContent.style.transition = "none";
-                scrollContent.style.transform = "translateY(0px)";
+                offset = 0; // Réinitialiser à zéro
+                scrollContent.style.transition = "none"; // Désactiver temporairement la transition
+                scrollContent.style.transform = "translateY(0px)"; // Retour en haut
                 void scrollContent.offsetWidth; // Forcer un reflow
-                scrollContent.style.transition = "transform 0.3s ease-in-out";
+                scrollContent.style.transition = "transform 0.3s ease-in-out"; // Réactiver la transition
             }} else {{
                 scrollContent.style.transform = "translateY(" + translateY + "px)";
             }}
@@ -131,9 +131,9 @@ html_content = f"""
 
         // Démarrer l'animation
         setInterval(scroll, 1000); // Défilement toutes les secondes
-        updateStyles(); // Initialisation
+        updateStyles(); // Initialisation des styles
     </script>
 """
 
-# Intégrer le contenu HTML/CSS/JS dans l'application Streamlit
+# Intégrer le HTML dans Streamlit
 components.html(html_content, height=300, width=600)
