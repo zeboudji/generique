@@ -47,7 +47,7 @@ html_content = f"""
         #scroll-container {{
             position: relative;
             width: 100%;
-            margin: 0 auto;
+            margin: auto auto;
             height: 120px; /* Hauteur visible du conteneur (3 phrases * 40px) */
             overflow: hidden;
             background-color: #ffffff; /* Couleur de fond */
