@@ -46,7 +46,7 @@ html_content = f"""
         /* Conteneur principal */
         #scroll-container {{
             position: relative;
-            width: 80%;
+            width: 100%;
             margin: 0 auto;
             height: 120px; /* Hauteur visible du conteneur (3 phrases * 40px) */
             overflow: hidden;
