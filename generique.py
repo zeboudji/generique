@@ -46,14 +46,15 @@ html_content = f"""
         /* Conteneur principal */
         #scroll-container {{
             position: relative;
-            width: 80%;
+            width:500px;
             margin: 0 auto;
-            height: 120px; /* Hauteur visible du conteneur (3 phrases * 40px) */
+            height: 220px; /* Hauteur visible du conteneur (3 phrases * 40px) */
             overflow: hidden;
             background-color: #ffffff; /* Couleur de fond */
             display: flex;
             align-items: center;
             justify-content: center;
+            border: none; /* Pas de bordure */
         }}
 
         /* Contenu défilant */
@@ -63,7 +64,7 @@ html_content = f"""
             position: absolute;
             top: 0;
             left: 0;
-            transform: translateY(0);
+            transition: transform 0.5s ease-in-out;
         }}
 
         /* Styles des phrases */
@@ -92,42 +93,45 @@ html_content = f"""
         const phraseElements = document.querySelectorAll(".phrase");
 
         const totalPhrases = {total_phrases};
-        let position = 0;
-        const phraseHeight = {phrase_height}; // Hauteur de chaque phrase en px
-        const scrollSpeed = 0.5; // Vitesse de défilement (pixels par frame)
-        const centralPosition = 60; // Position centrale en px (moitié de la hauteur du conteneur)
+        let currentIndex = 0;
 
-        // Fonction pour mettre à jour les classes des phrases
+        // Initialisation
+        updatePhrases();
+
+        // Fonction pour mettre à jour les classes
         function updatePhrases() {{
             // Réinitialiser toutes les classes
             phraseElements.forEach(el => el.classList.remove("current"));
 
-            // Calculer l'indice de la phrase centrale
-            const currentPhraseIndex = Math.floor((position + centralPosition - (phraseHeight / 2)) / phraseHeight);
-            if (phraseElements[currentPhraseIndex]) {{
-                phraseElements[currentPhraseIndex].classList.add("current");
+            // Ajouter la classe 'current' à la phrase centrale
+            if (phraseElements[currentIndex]) {{
+                phraseElements[currentIndex].classList.add("current");
             }}
+
+            // Calculer la nouvelle position
+            const translateY = -currentIndex * 40; // 40px est la hauteur de chaque phrase
+            scrollContent.style.transform = `translateY(${{translateY}}px)`;
         }}
 
-        // Fonction de défilement
-        function scroll() {{
-            position -= scrollSpeed;
-            scrollContent.style.transform = `translateY(${position}px)`;
-
-            // Si le défilement a atteint la fin d'une boucle, réinitialiser la position
-            if (position <= -{scroll_height}px) {{
-                position += {scroll_height}px;
+        // Fonction pour passer à la phrase suivante
+        function nextPhrase() {{
+            currentIndex += 1;
+            if (currentIndex >= totalPhrases) {{
+                // Réinitialiser pour la boucle infinie
+                currentIndex = 0;
+                scrollContent.style.transition = 'none'; // Désactiver la transition pour réinitialiser instantanément
+                scrollContent.style.transform = 'translateY(0px)';
+                // Forcer le reflow pour que le changement soit pris en compte
+                void scrollContent.offsetWidth;
+                scrollContent.style.transition = 'transform 0.5s ease-in-out';
             }}
-
             updatePhrases();
-            requestAnimationFrame(scroll);
         }}
 
-        // Initialisation
-        updatePhrases();
-        scroll();
+        // Changer de phrase toutes les 3 secondes avec animation
+        setInterval(nextPhrase, 3000); // Change phrase every 3 seconds
     </script>
 """
 
 # Intégrer le contenu HTML/CSS/JS dans l'application Streamlit
-components.html(html_content, height=220)
+components.html(html_content, height=420, width=420)
