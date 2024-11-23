@@ -28,11 +28,6 @@ phrases = [
 # Sérialiser les phrases en format JSON pour JavaScript
 phrases_js = json.dumps(phrases)
 
-# Calculer la hauteur totale du scroll-content
-phrase_height = 40  # Hauteur de chaque phrase en pixels
-total_phrases = len(phrases)
-scroll_height = total_phrases * phrase_height
-
 # Contenu HTML avec CSS et JavaScript intégrés
 html_content = f"""
     <div id="scroll-container">
@@ -46,25 +41,21 @@ html_content = f"""
         /* Conteneur principal */
         #scroll-container {{
             position: relative;
-            width:500px;
+            width: 80%;
+            height: 120px; /* Hauteur visible du conteneur (3 phrases * 40px) */
             margin: 0 auto;
-            height: 220px; /* Hauteur visible du conteneur (3 phrases * 40px) */
             overflow: hidden;
             background-color: #ffffff; /* Couleur de fond */
-            display: flex;
-            align-items: center;
-            justify-content: center;
             border: none; /* Pas de bordure */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
         }}
 
         /* Contenu défilant */
         #scroll-content {{
             display: flex;
             flex-direction: column;
-            position: absolute;
-            top: 0;
-            left: 0;
-            transition: transform 0.5s ease-in-out;
+            animation: scroll 20s linear infinite;
         }}
 
         /* Styles des phrases */
@@ -77,61 +68,36 @@ html_content = f"""
             box-sizing: border-box;
             opacity: 0.6;
             transition: all 0.3s ease-in-out;
+            position: relative;
         }}
 
-        /* Style de la phrase centrale */
-        .current {{
+        /* Mise en évidence de la phrase centrale */
+        .phrase:nth-child(3) {{
             font-size: 24px;
             opacity: 1;
+            color: #FF0000; /* Couleur de mise en évidence (Rouge Porsche) */
+            font-weight: bold;
             transform: scale(1.2);
+        }}
+
+        /* Animation de défilement */
+        @keyframes scroll {{
+            0% {{
+                transform: translateY(0);
+            }}
+            100% {{
+                transform: translateY(-{len(phrases) * 40}px);
+            }}
         }}
     </style>
 
     <script>
-        const phrases = {phrases_js};
-        const scrollContent = document.getElementById("scroll-content");
-        const phraseElements = document.querySelectorAll(".phrase");
-
-        const totalPhrases = {total_phrases};
-        let currentIndex = 0;
-
-        // Initialisation
-        updatePhrases();
-
-        // Fonction pour mettre à jour les classes
-        function updatePhrases() {{
-            // Réinitialiser toutes les classes
-            phraseElements.forEach(el => el.classList.remove("current"));
-
-            // Ajouter la classe 'current' à la phrase centrale
-            if (phraseElements[currentIndex]) {{
-                phraseElements[currentIndex].classList.add("current");
-            }}
-
-            // Calculer la nouvelle position
-            const translateY = -currentIndex * 40; // 40px est la hauteur de chaque phrase
-            scrollContent.style.transform = `translateY(${{translateY}}px)`;
-        }}
-
-        // Fonction pour passer à la phrase suivante
-        function nextPhrase() {{
-            currentIndex += 1;
-            if (currentIndex >= totalPhrases) {{
-                // Réinitialiser pour la boucle infinie
-                currentIndex = 0;
-                scrollContent.style.transition = 'none'; // Désactiver la transition pour réinitialiser instantanément
-                scrollContent.style.transform = 'translateY(0px)';
-                // Forcer le reflow pour que le changement soit pris en compte
-                void scrollContent.offsetWidth;
-                scrollContent.style.transition = 'transform 0.5s ease-in-out';
-            }}
-            updatePhrases();
-        }}
-
-        // Changer de phrase toutes les 3 secondes avec animation
-        setInterval(nextPhrase, 3000); // Change phrase every 3 seconds
+        // Ajuster la durée de l'animation en fonction du nombre de phrases
+        const totalPhrases = {len(phrases)};
+        const animationDuration = totalPhrases * 1.5; // 1.5 secondes par phrase
+        document.getElementById('scroll-content').style.animationDuration = `${animationDuration}s`;
     </script>
 """
 
 # Intégrer le contenu HTML/CSS/JS dans l'application Streamlit
-components.html(html_content, height=420, width=420)
+components.html(html_content, height=160)
