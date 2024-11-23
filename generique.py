@@ -51,7 +51,7 @@ html_code = """
         #scroll-content {
             display: flex;
             flex-direction: column; /* Arrange les phrases en colonne */
-            position: absolute;
+            position: absolute; /* Positionnement absolu pour permettre l'animation */
             top: 0;
             left: 0;
             animation: scroll 30s linear infinite alternate; /* Animation de défilement */
@@ -143,7 +143,7 @@ html_code = """
             <div class="phrase">Certains pensent même que</div>
             <div class="phrase">L’IA est loin d'être une révolution.</div>
             <div class="phrase">Il est donc difficile de croire que</div>
-            <div class="phrase">Cette offre est vraiement exceptionnelle !</div>
+            <div class="phrase">Cette offre est vraiment exceptionnelle !</div>
             <div class="phrase">---</div>
             <div class="phrase">Pourtant...</div>
             <!-- Phrases dupliquées pour boucle infinie -->
@@ -160,7 +160,7 @@ html_code = """
             <div class="phrase">Certains pensent même que</div>
             <div class="phrase">L’IA est loin d'être une révolution.</div>
             <div class="phrase">Il est donc difficile de croire que</div>
-            <div class="phrase">Cette offre est vraiement exceptionnelle !</div>
+            <div class="phrase">Cette offre est vraiment exceptionnelle !</div>
             <div class="phrase">---</div>
             <div class="phrase">Pourtant...</div>
         </div>
@@ -220,7 +220,7 @@ html_code = """
 # Intégrer le contenu HTML/CSS/JS dans l'application Streamlit
 # Utilisation de components.html pour afficher le HTML personnalisé
 # Le paramètre height est ajusté en fonction de la hauteur du conteneur
-components.html(html_code, height=150)
+components.html(html_code, height=200)  # Augmente légèrement la hauteur pour éviter les débordements
 
 # Explications supplémentaires (facultatif)
 st.markdown("""
