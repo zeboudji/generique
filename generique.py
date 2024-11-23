@@ -28,6 +28,11 @@ phrases = [
 # Sérialiser les phrases en format JSON pour JavaScript
 phrases_js = json.dumps(phrases)
 
+# Calculer la hauteur totale du scroll-content
+phrase_height = 40  # Hauteur de chaque phrase en pixels
+total_phrases = len(phrases)
+scroll_height = total_phrases * phrase_height
+
 # Contenu HTML avec CSS et JavaScript intégrés
 html_content = f"""
     <div id="scroll-container">
@@ -55,7 +60,7 @@ html_content = f"""
         #scroll-content {{
             display: flex;
             flex-direction: column;
-            animation: scroll 20s linear infinite;
+            animation: scroll {total_phrases * 1.5}s linear infinite alternate;
         }}
 
         /* Styles des phrases */
@@ -72,7 +77,7 @@ html_content = f"""
         }}
 
         /* Mise en évidence de la phrase centrale */
-        .phrase:nth-child(3) {{
+        .phrase:nth-child(3), .phrase:nth-child({3 + total_phrases}) {{
             font-size: 24px;
             opacity: 1;
             color: #FF0000; /* Couleur de mise en évidence (Rouge Porsche) */
@@ -86,7 +91,7 @@ html_content = f"""
                 transform: translateY(0);
             }}
             100% {{
-                transform: translateY(-{len(phrases) * 40}px);
+                transform: translateY(-{total_phrases * phrase_height}px);
             }}
         }}
     </style>
@@ -95,7 +100,7 @@ html_content = f"""
         // Ajuster la durée de l'animation en fonction du nombre de phrases
         const totalPhrases = {len(phrases)};
         const animationDuration = totalPhrases * 1.5; // 1.5 secondes par phrase
-        document.getElementById('scroll-content').style.animationDuration = `${animationDuration}s`;
+        document.getElementById('scroll-content').style.animationDuration = animationDuration + 's';
     </script>
 """
 
